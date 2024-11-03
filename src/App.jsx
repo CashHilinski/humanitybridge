@@ -29,6 +29,13 @@ const HeroSection = styled.div`
   justify-content: center;
   align-items: center;
   gap: 20px;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
 `
 
 const CanvasContainer = styled.div`
@@ -40,6 +47,12 @@ const CanvasContainer = styled.div`
   overflow: hidden;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.05);
+
+  @media (max-width: 768px) {
+    width: 100%;
+    height: 60vh;
+    margin-top: 60px;
+  }
 
   &::after {
     content: '';
@@ -120,6 +133,15 @@ const FilterContainer = styled.div`
   flex-wrap: wrap;
   gap: 8px;
   max-width: 400px;
+
+  @media (max-width: 768px) {
+    top: 5px;
+    right: 5px;
+    padding: 4px;
+    gap: 2px;
+    max-width: 200px;
+    background: rgba(20, 20, 30, 0.98);
+  }
 `
 
 const FilterButton = styled.button`
@@ -134,6 +156,16 @@ const FilterButton = styled.button`
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+
+  @media (max-width: 768px) {
+    padding: 4px 6px;
+    font-size: 9px;
+    border-radius: 4px;
+    min-width: auto;
+    flex: 0 1 auto;
+    letter-spacing: 0;
+    border-width: 1px;
+  }
 
   &:hover {
     background: ${props => props.$active ? '#4ecdc4' : 'rgba(78, 205, 196, 0.1)'};
@@ -154,6 +186,10 @@ const FilterLabel = styled.div`
   width: 100%;
   text-transform: uppercase;
   letter-spacing: 1px;
+
+  @media (max-width: 768px) {
+    display: none;  // Hide the label on mobile
+  }
 `
 
 // Create a component to handle map events
@@ -188,14 +224,20 @@ const InfoMessage = styled.div`
   transform: translateX(-50%);
   padding: 0.8rem 1.2rem;
   color: white;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(13, 13, 32, 0.9);
   border-radius: 10px;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(78, 205, 196, 0.1);
   font-size: 0.9rem;
   text-align: center;
   max-width: 400px;
   z-index: 5;
+
+  @media (max-width: 768px) {
+    width: 90%;
+    bottom: 10px;
+    font-size: 0.8rem;
+  }
 `
 
 const HelpPanel = styled.div`
@@ -209,8 +251,12 @@ const HelpPanel = styled.div`
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   height: fit-content;
   margin-top: 80px;
-  position: sticky;
-  top: 100px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    margin-top: 20px;
+    padding: 16px;
+  }
 `
 
 const HelpTitle = styled.h3`

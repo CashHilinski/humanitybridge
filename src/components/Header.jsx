@@ -2,7 +2,7 @@ import styled from 'styled-components'
 
 const HeaderContainer = styled.header`
   height: 80px;
-  background: rgba(20, 20, 40, 0.95);
+  background: rgba(13, 13, 32, 0.95);
   backdrop-filter: blur(20px);
   display: flex;
   align-items: center;
@@ -13,18 +13,21 @@ const HeaderContainer = styled.header`
   left: 0;
   right: 0;
   z-index: 1000;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(78, 205, 196, 0.1);
+
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+    height: 60px;
+  }
 `
 
 const LogoContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
-  cursor: pointer;
-  transition: transform 0.3s ease;
 
-  &:hover {
-    transform: scale(1.05);
+  @media (max-width: 768px) {
+    gap: 0.5rem;
   }
 `
 
@@ -39,8 +42,9 @@ const LogoSymbol = styled.div`
   justify-content: center;
   transition: transform 0.6s ease;
 
-  &:hover {
-    transform: rotate(180deg);
+  @media (max-width: 768px) {
+    width: 30px;
+    height: 30px;
   }
 `
 
@@ -85,6 +89,10 @@ const MainTitle = styled.h1`
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: 0.5px;
+
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
 `
 
 const Subtitle = styled.span`
@@ -92,11 +100,20 @@ const Subtitle = styled.span`
   color: rgba(255, 255, 255, 0.6);
   letter-spacing: 2px;
   text-transform: uppercase;
+
+  @media (max-width: 768px) {
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+  }
 `
 
 const Nav = styled.nav`
   display: flex;
   gap: 2rem;
+
+  @media (max-width: 768px) {
+    gap: 0.8rem;
+  }
 `
 
 const NavLink = styled.a`
@@ -106,6 +123,11 @@ const NavLink = styled.a`
   font-weight: 500;
   transition: all 0.3s ease;
   cursor: pointer;
+
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.5rem;
+  }
 
   &:after {
     content: '';
