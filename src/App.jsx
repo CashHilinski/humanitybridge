@@ -17,8 +17,16 @@ import L from 'leaflet'
 const AppContainer = styled.div`
   width: 100vw;
   min-height: 100vh;
+  min-height: -webkit-fill-available;
   background: #1E1E2E;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+
+  @supports (-webkit-touch-callout: none) {
+    /* iOS specific fix */
+    min-height: -webkit-fill-available;
+  }
 `
 
 const HeroSection = styled.div`
@@ -307,13 +315,41 @@ function App() {
   const projectCache = useRef(new Map())
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Add this effect to detect mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const fetchLocalProjects = useCallback(async (map) => {
+    // Check zoom level with mobile consideration
+    const currentZoom = map.getZoom()
+    const minZoomLevel = isMobile ? 12 : 12 // Changed from 14 to 12 for mobile
+    
+    console.log('Current zoom:', currentZoom, 'Mobile:', isMobile) // Debug log
+    
+    if (currentZoom < minZoomLevel) {
+      console.log('Zoom too low, clearing projects') // Debug log
+      setLocalProjects([])
+      return
+    }
+
+    // Rate limiting
     const now = Date.now()
-    if (now - lastFetchRef.current < 3000) return
+    if (now - lastFetchRef.current < 3000) {
+      console.log('Rate limited') // Debug log
+      return
+    }
     lastFetchRef.current = now
 
     const bounds = map.getBounds()
+    console.log('Fetching projects for bounds:', bounds) // Debug log
     
     try {
       // First get OSM data
@@ -381,8 +417,9 @@ function App() {
       setLocalProjects(enrichedProjects)
     } catch (error) {
       console.error('Error fetching local projects:', error)
+      setLocalProjects([])
     }
-  }, [])
+  }, [isMobile])
 
   // Helper functions to generate placeholder data
   const generateDescription = (type) => {

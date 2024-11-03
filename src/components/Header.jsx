@@ -16,7 +16,7 @@ const HeaderContainer = styled.header`
   border-bottom: 1px solid rgba(78, 205, 196, 0.1);
 
   @media (max-width: 768px) {
-    padding: 0 1rem;
+    padding: 0 0.5rem;
     height: 60px;
   }
 `
@@ -91,7 +91,7 @@ const MainTitle = styled.h1`
   letter-spacing: 0.5px;
 
   @media (max-width: 768px) {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 `
 
@@ -102,8 +102,7 @@ const Subtitle = styled.span`
   text-transform: uppercase;
 
   @media (max-width: 768px) {
-    font-size: 0.6rem;
-    letter-spacing: 1px;
+    display: none;
   }
 `
 
@@ -112,7 +111,7 @@ const Nav = styled.nav`
   gap: 2rem;
 
   @media (max-width: 768px) {
-    gap: 0.8rem;
+    gap: 0.4rem;
   }
 `
 
@@ -125,24 +124,13 @@ const NavLink = styled.a`
   cursor: pointer;
 
   @media (max-width: 768px) {
-    font-size: 0.8rem;
-    padding: 0.3rem 0.5rem;
-  }
-
-  &:after {
-    content: '';
-    display: block;
-    width: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
-    transition: width 0.3s ease;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.3rem;
+    letter-spacing: -0.2px;
   }
 
   &:hover {
     color: white;
-    &:after {
-      width: 100%;
-    }
   }
 `
 
