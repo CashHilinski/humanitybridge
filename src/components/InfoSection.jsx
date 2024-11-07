@@ -135,7 +135,7 @@ const InfoSection = () => {
         <Card className="info-card">
           <h3>Who We Are</h3>
           <p>
-            Humanity Bridge is a project by <a href="#" style={{ fontWeight: 'bold' }}>CRH & Co</a>, 
+            Humanity Bridge is a project by <a href="https://crh.netlify.app/" target="_blank" rel="noopener noreferrer" style={{ fontWeight: 'bold' }}>CRH & Co</a>, 
             a forward-thinking organization dedicated to connecting people with meaningful opportunities 
             to make a difference in their communities and around the world.
           </p>
