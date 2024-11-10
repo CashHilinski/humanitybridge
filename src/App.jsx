@@ -8,7 +8,6 @@ import Globe from './components/Globe'
 import Header from './components/Header'
 import ProjectModal from './components/ProjectModal'
 import InfoSection from './components/InfoSection'
-import ProjectsSection from './components/ProjectsSection'
 import ImpactSection from './components/ImpactSection'
 import ContactSection from './components/ContactSection'
 import { ProjectProvider } from './contexts/ProjectContext'
@@ -732,7 +731,6 @@ function App() {
           </HelpPanel>
         </HeroSection>
         <InfoSection />
-        <ProjectsSection />
         <ImpactSection />
         <ContactSection />
         <ProjectModal />

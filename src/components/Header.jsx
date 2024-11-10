@@ -165,7 +165,6 @@ const Header = () => {
       </LogoContainer>
       <Nav>
         <NavLink onClick={() => scrollToSection('about')}>About</NavLink>
-        <NavLink onClick={() => scrollToSection('projects')}>Projects</NavLink>
         <NavLink onClick={() => scrollToSection('impact')}>Impact</NavLink>
         <NavLink onClick={() => scrollToSection('contact')}>Contact</NavLink>
       </Nav>
