@@ -55,13 +55,23 @@ const ImageContainer = styled.div`
     width: 100%;
     height: 400px;
     object-fit: cover;
+    transition: transform 0.5s ease;
   }
 
   &::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(0deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+    background: linear-gradient(
+      45deg,
+      rgba(255, 107, 107, 0.2),
+      rgba(78, 205, 196, 0.2)
+    );
+    mix-blend-mode: overlay;
+  }
+
+  &:hover img {
+    transform: scale(1.05);
   }
 `;
 
@@ -82,6 +92,19 @@ const Content = styled.div`
     background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 3px;
+      background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+      border-radius: 2px;
+    }
   }
 
   p {
@@ -89,11 +112,24 @@ const Content = styled.div`
     line-height: 1.8;
     color: rgba(255, 255, 255, 0.9);
     margin-bottom: 3rem;
+    position: relative;
+    padding-left: 20px;
 
     @media (max-width: 768px) {
       font-size: 1rem;
       line-height: 1.6;
       margin-bottom: 2rem;
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 4px;
+      height: 4px;
+      background: #4ecdc4;
+      border-radius: 50%;
     }
   }
 `;
@@ -154,6 +190,20 @@ const Stats = styled.div`
       h4 {
         transform: scale(1.1);
       }
+
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, rgba(78, 205, 196, 0.1), transparent);
+        animation: pulse 2s infinite;
+      }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.05); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 0.5; }
     }
 
     h4 {
@@ -163,9 +213,24 @@ const Stats = styled.div`
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       transition: transform 0.3s ease;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.8s forwards;
+      animation-play-state: paused;
 
       @media (max-width: 768px) {
         font-size: 2.5rem;
+      }
+
+      &.visible {
+        animation-play-state: running;
+      }
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
     }
 
@@ -182,10 +247,33 @@ const Stats = styled.div`
 `;
 
 const ImpactSection = () => {
+  const statsRef = React.useRef(null)
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.querySelectorAll('h4').forEach(el => {
+              el.classList.add('visible')
+            })
+          }
+        })
+      },
+      { threshold: 0.5 }
+    )
+
+    if (statsRef.current) {
+      observer.observe(statsRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <Section id="impact">
       <Container>
-        <Title>Making a Global Impact</Title>
+        <Title>Building Stronger Communities</Title>
         
         <Grid>
           <ImageContainer>
@@ -195,31 +283,32 @@ const ImpactSection = () => {
             />
           </ImageContainer>
           <Content>
-            <h3>Connecting Hearts & Hands</h3>
+            <h3>Connecting Communities</h3>
             <p>
-              At Humanity Bridge, we believe in the power of connection. We bridge the gap between passionate volunteers 
-              and organizations making real change on the ground. Our platform makes it simple to find and engage with 
-              humanitarian projects worldwide, turning compassion into action.
+              At Humanity Bridge, we believe everyone deserves access to community resources. We bridge the gap 
+              between those seeking assistance and local support systems, while connecting passionate volunteers 
+              with organizations making real change. Our platform makes it simple to find food banks, shelters, 
+              and humanitarian projects in your area.
             </p>
             <p>
-              Whether you're a skilled professional, student, or simply want to help, we connect you directly with 
-              organizations that need your unique abilities and dedication.
+              Whether you're looking for community support or wanting to help others, we connect you directly 
+              with verified local organizations and resources that make a difference.
             </p>
           </Content>
         </Grid>
 
-        <Stats>
+        <Stats ref={statsRef}>
           <div className="stat">
-            <h4>150+</h4>
-            <p>Active Projects</p>
+            <h4>1.4M+</h4>
+            <p>Resources & Projects</p>
           </div>
           <div className="stat">
-            <h4>50+</h4>
-            <p>Countries Reached</p>
+            <h4>175+</h4>
+            <p>Countries Connected</p>
           </div>
           <div className="stat">
             <h4>10K+</h4>
-            <p>Volunteers Connected</p>
+            <p>People Helped Daily</p>
           </div>
         </Stats>
 
@@ -227,13 +316,13 @@ const ImpactSection = () => {
           <Content>
             <h3>Real Change, Real Impact</h3>
             <p>
-              From disaster relief to long-term development projects, our platform facilitates meaningful connections 
-              that create lasting impact. We ensure that every volunteer opportunity is verified and impactful, 
-              working with trusted organizations worldwide.
+              From local food banks to global disaster relief, our platform ensures that everyone can find the 
+              support they need or the opportunity to help. We verify every organization and resource listed, 
+              making it safe and simple to connect with your community.
             </p>
             <p>
-              Join us in building a global community of changemakers, where every individual has the power to 
-              make a difference in the world.
+              Join us in building an accessible support network where no one feels alone, and every individual 
+              can either find help or make a difference in their community.
             </p>
           </Content>
           <ImageContainer>

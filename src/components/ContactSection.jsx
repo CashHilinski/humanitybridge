@@ -96,13 +96,9 @@ const ContactSection = () => {
           </ContactCard>
 
           <ContactCard>
-            <h3>🤝 Social Impact</h3>
-            <p>Follow our journey</p>
-            <p>
-              <a href="#linkedin" style={{ marginRight: '1rem' }}>LinkedIn</a>
-              <a href="#twitter" style={{ marginRight: '1rem' }}>Twitter</a>
-              <a href="#instagram">Instagram</a>
-            </p>
+            <h3>🤝 Join Us</h3>
+            <p>Start making a difference</p>
+            <p>in your community today</p>
           </ContactCard>
         </ContactGrid>
 
