@@ -308,7 +308,7 @@ const ImpactSection = () => {
           </div>
           <div className="stat">
             <h4>10K+</h4>
-            <p>People Helped Daily</p>
+            <p>Volunteers Connected</p>
           </div>
         </Stats>
 
