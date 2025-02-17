@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
+import { useLanguage } from '../contexts/LanguageContext'
 
 const Section = styled.section`
   min-height: 100vh;
@@ -193,6 +194,8 @@ const Title = styled.h2`
 `
 
 const InfoSection = () => {
+  const { t } = useLanguage()
+  
   // Add intersection observer to animate cards when they come into view
   const observerRef = React.useRef(null)
   
@@ -218,48 +221,31 @@ const InfoSection = () => {
   return (
     <Section id="about">
       <Container>
-        <Title>About Humanity Bridge</Title>
+        <Title>{t('about.title')}</Title>
         
         <Card className="info-card">
-          <h3>Who We Are</h3>
-          <p>
-            Humanity Bridge is a forward-thinking platform dedicated to connecting both volunteers and those in need 
-            with local resources, community support, and meaningful opportunities to make a difference.
-          </p>
+          <h3>{t('about.whoWeAre.title')}</h3>
+          <p>{t('about.whoWeAre.content')}</p>
         </Card>
 
         <Card className="info-card">
-          <h3>Our Mission</h3>
-          <p>
-            Bridging the gap between communities by connecting people with local resources, food banks, shelters, 
-            and humanitarian projects worldwide, making support and impact accessible to everyone.
-          </p>
+          <h3>{t('about.mission.title')}</h3>
+          <p>{t('about.mission.content')}</p>
         </Card>
 
         <Card className="info-card">
-          <h3>How It Works</h3>
-          <p>
-            Browse our interactive globe to find nearby community resources, food banks, shelters, and volunteer 
-            opportunities. Whether you're looking to help or seeking assistance, we connect you directly with 
-            verified local organizations.
-          </p>
+          <h3>{t('about.howItWorks.title')}</h3>
+          <p>{t('about.howItWorks.content')}</p>
         </Card>
 
         <Card className="info-card">
-          <h3>Impact</h3>
-          <p>
-            Connecting over 10K people daily with essential resources and support across 175+ countries, 
-            with 1.4 Million+ verified locations including food banks, shelters, and community centers.
-          </p>
+          <h3>{t('about.impact.title')}</h3>
+          <p>{t('about.impact.content')}</p>
         </Card>
 
         <Card className="info-card">
-          <h3>Get Involved</h3>
-          <p>
-            Whether you're seeking community resources or want to help others, we're here for you. 
-            Simply explore the interactive globe to find nearby food banks, shelters, and volunteer 
-            opportunities in your area.
-          </p>
+          <h3>{t('about.getInvolved.title')}</h3>
+          <p>{t('about.getInvolved.content')}</p>
         </Card>
       </Container>
     </Section>

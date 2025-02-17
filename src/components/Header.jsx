@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { useLanguage, translations } from '../contexts/LanguageContext'
 
 const HeaderContainer = styled.header`
   height: 80px;
@@ -109,6 +110,7 @@ const Subtitle = styled.span`
 const Nav = styled.nav`
   display: flex;
   gap: 2rem;
+  margin-${props => props.$isRTL ? 'right' : 'left'}: auto;
 
   @media (max-width: 768px) {
     gap: 0.4rem;
@@ -134,7 +136,33 @@ const NavLink = styled.a`
   }
 `
 
+const LanguageSelector = styled.select`
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  color: white;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-left: 1rem;
+  font-family: inherit;
+
+  option {
+    background: #1E1E2E;
+    color: white;
+    font-family: inherit;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.3rem;
+  }
+`
+
 const Header = () => {
+  const { language, setLanguage, t } = useLanguage()
+  const isRTL = translations[language]?.direction === 'rtl'
+
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -163,10 +191,28 @@ const Header = () => {
           <Subtitle>Global Impact</Subtitle>
         </LogoText>
       </LogoContainer>
-      <Nav>
-        <NavLink onClick={() => scrollToSection('about')}>About</NavLink>
-        <NavLink onClick={() => scrollToSection('impact')}>Impact</NavLink>
-        <NavLink onClick={() => scrollToSection('contact')}>Contact</NavLink>
+      <Nav $isRTL={isRTL}>
+        <NavLink onClick={() => scrollToSection('about')}>{t('nav.about')}</NavLink>
+        <NavLink onClick={() => scrollToSection('impact')}>{t('nav.impact')}</NavLink>
+        <NavLink onClick={() => scrollToSection('contact')}>{t('nav.contact')}</NavLink>
+        <LanguageSelector 
+          value={language} 
+          onChange={(e) => setLanguage(e.target.value)}
+        >
+          <option value="en">🇺🇸 English</option>
+          <option value="es">🇪🇸 Español</option>
+          <option value="fr">🇫🇷 Français</option>
+          <option value="de">🇩🇪 Deutsch</option>
+          <option value="ar">🇸🇦 العربية</option>
+          <option value="he">🇮🇱 עברית</option>
+          <option value="zh">🇨🇳 中文</option>
+          <option value="ru">🇷🇺 Русский</option>
+          <option value="ja">🇯🇵 日本語</option>
+          <option value="it">🇮🇹 Italiano</option>
+          <option value="sw">🇰🇪 Kiswahili</option>
+          <option value="yo">n🇬 Yorùbá</option>
+          <option value="hi">🇮🇳 हिंदी</option>
+        </LanguageSelector>
       </Nav>
     </HeaderContainer>
   )

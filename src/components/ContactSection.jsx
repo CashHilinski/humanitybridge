@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const Section = styled.section`
   padding: 4rem 2rem;
@@ -76,35 +77,37 @@ const Footer = styled.div`
 `;
 
 const ContactSection = () => {
+  const { t } = useLanguage();
+  
   return (
     <Section id="contact">
       <Container>
-        <Title>Get in Touch</Title>
+        <Title>{t('contact.title')}</Title>
         
         <ContactGrid>
           <ContactCard>
-            <h3>📧 Email</h3>
-            <p>Questions or suggestions?</p>
+            <h3>{t('contact.email.title')}</h3>
+            <p>{t('contact.email.subtitle')}</p>
             <a href="mailto:contact@humanitybridge.org">contact@humanitybridge.org</a>
           </ContactCard>
 
           <ContactCard>
-            <h3>📍 Location</h3>
-            <p>11770 US Highway 1</p>
-            <p>Palm Beach Gardens</p>
-            <p>Florida, FL 33408</p>
+            <h3>{t('contact.location.title')}</h3>
+            {t('contact.location.address').map((line, index) => (
+              <p key={index}>{line}</p>
+            ))}
           </ContactCard>
 
           <ContactCard>
-            <h3>🤝 Join Us</h3>
-            <p>Start making a difference</p>
-            <p>in your community today</p>
+            <h3>{t('contact.join.title')}</h3>
+            <p>{t('contact.join.subtitle')}</p>
+            <p>{t('contact.join.content')}</p>
           </ContactCard>
         </ContactGrid>
 
         <Footer>
-          <p>© 2024 Humanity Bridge. All rights reserved.</p>
-          <p>Connecting hearts and hands across the globe</p>
+          <p>{t('contact.footer.copyright')}</p>
+          <p>{t('contact.footer.tagline')}</p>
         </Footer>
       </Container>
     </Section>

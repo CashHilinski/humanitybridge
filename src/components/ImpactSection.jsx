@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const Section = styled.section`
   min-height: 100vh;
@@ -247,7 +248,8 @@ const Stats = styled.div`
 `;
 
 const ImpactSection = () => {
-  const statsRef = React.useRef(null)
+  const statsRef = React.useRef(null);
+  const { t } = useLanguage();
 
   React.useEffect(() => {
     const observer = new IntersectionObserver(
@@ -273,7 +275,7 @@ const ImpactSection = () => {
   return (
     <Section id="impact">
       <Container>
-        <Title>Building Stronger Communities</Title>
+        <Title>{t('impact.title')}</Title>
         
         <Grid>
           <ImageContainer>
@@ -283,47 +285,32 @@ const ImpactSection = () => {
             />
           </ImageContainer>
           <Content>
-            <h3>Connecting Communities</h3>
-            <p>
-              At Humanity Bridge, we believe everyone deserves access to community resources. We bridge the gap 
-              between those seeking assistance and local support systems, while connecting passionate volunteers 
-              with organizations making real change. Our platform makes it simple to find food banks, shelters, 
-              and humanitarian projects in your area.
-            </p>
-            <p>
-              Whether you're looking for community support or wanting to help others, we connect you directly 
-              with verified local organizations and resources that make a difference.
-            </p>
+            <h3>{t('impact.connecting.title')}</h3>
+            <p>{t('impact.connecting.content1')}</p>
+            <p>{t('impact.connecting.content2')}</p>
           </Content>
         </Grid>
 
         <Stats ref={statsRef}>
           <div className="stat">
             <h4>1.4M+</h4>
-            <p>Resources & Projects</p>
+            <p>{t('impact.stats.resources')}</p>
           </div>
           <div className="stat">
             <h4>175+</h4>
-            <p>Countries Connected</p>
+            <p>{t('impact.stats.countries')}</p>
           </div>
           <div className="stat">
             <h4>10K+</h4>
-            <p>Volunteers Connected</p>
+            <p>{t('impact.stats.volunteers')}</p>
           </div>
         </Stats>
 
         <Grid>
           <Content>
-            <h3>Real Change, Real Impact</h3>
-            <p>
-              From local food banks to global disaster relief, our platform ensures that everyone can find the 
-              support they need or the opportunity to help. We verify every organization and resource listed, 
-              making it safe and simple to connect with your community.
-            </p>
-            <p>
-              Join us in building an accessible support network where no one feels alone, and every individual 
-              can either find help or make a difference in their community.
-            </p>
+            <h3>{t('impact.realChange.title')}</h3>
+            <p>{t('impact.realChange.content1')}</p>
+            <p>{t('impact.realChange.content2')}</p>
           </Content>
           <ImageContainer>
             <img 

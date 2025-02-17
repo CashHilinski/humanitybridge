@@ -12,6 +12,7 @@ import ImpactSection from './components/ImpactSection'
 import ContactSection from './components/ContactSection'
 import { ProjectProvider } from './contexts/ProjectContext'
 import L from 'leaflet'
+import { LanguageProvider, useLanguage, translations } from './contexts/LanguageContext'
 
 const AppContainer = styled.div`
   width: 100vw;
@@ -21,6 +22,7 @@ const AppContainer = styled.div`
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  direction: ${props => props.$direction};
 
   @supports (-webkit-touch-callout: none) {
     /* iOS specific fix */
@@ -303,7 +305,8 @@ const HelpList = styled.ul`
   }
 `
 
-function App() {
+// Separate the main app content into a new component
+const AppContent = () => {
   const [isCanvasHovered, setIsCanvasHovered] = useState(false)
   const [showMap, setShowMap] = useState(false)
   const [mapCenter, setMapCenter] = useState([0, 0])
@@ -315,6 +318,8 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const { language, t } = useLanguage()
+  const direction = translations[language]?.direction || 'ltr'
 
   // Add this effect to detect mobile
   useEffect(() => {
@@ -491,251 +496,258 @@ function App() {
   }, [])
 
   return (
-    <ProjectProvider>
-      <AppContainer>
-        <Header />
-        <HeroSection>
-          <CanvasContainer 
-            $isHovered={isCanvasHovered}
-            onMouseEnter={() => setIsCanvasHovered(true)}
-            onMouseLeave={() => setIsCanvasHovered(false)}
-          >
-            <Canvas 
-              camera={{ position: [0, 0, 15], fov: 45 }}
-              style={{ width: '100%', height: '100%' }}
-              onCreated={({ gl }) => {
-                try {
-                  gl.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-                  gl.setClearColor('#000000', 1)
-                  setIsLoading(false)
-                } catch (error) {
-                  console.error('Canvas creation error:', error)
-                  setHasError(true)
-                }
-              }}
-              onError={(error) => {
-                console.error('Canvas render error:', error)
+    <AppContainer $direction={direction}>
+      <Header />
+      <HeroSection>
+        <CanvasContainer 
+          $isHovered={isCanvasHovered}
+          onMouseEnter={() => setIsCanvasHovered(true)}
+          onMouseLeave={() => setIsCanvasHovered(false)}
+        >
+          <Canvas 
+            camera={{ position: [0, 0, 15], fov: 45 }}
+            style={{ width: '100%', height: '100%' }}
+            onCreated={({ gl }) => {
+              try {
+                gl.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+                gl.setClearColor('#000000', 1)
+                setIsLoading(false)
+              } catch (error) {
+                console.error('Canvas creation error:', error)
                 setHasError(true)
-              }}
-            >
-              {!hasError && (
-                <>
-                  <ambientLight intensity={0.4} />
-                  <directionalLight position={[10, 10, 5]} intensity={1.2} />
-                  <Globe />
-                  <OrbitControls 
-                    ref={controlsRef}
-                    enablePan={true}
-                    enableZoom={true}
-                    enableRotate={true}
-                    minDistance={3.4}
-                    maxDistance={20}
-                    rotateSpeed={0.5}
-                    zoomSpeed={1.0}
-                    panSpeed={0.5}
-                    onChange={handleGlobeZoom}
-                  />
-                </>
-              )}
-            </Canvas>
+              }
+            }}
+            onError={(error) => {
+              console.error('Canvas render error:', error)
+              setHasError(true)
+            }}
+          >
+            {!hasError && (
+              <>
+                <ambientLight intensity={0.4} />
+                <directionalLight position={[10, 10, 5]} intensity={1.2} />
+                <Globe />
+                <OrbitControls 
+                  ref={controlsRef}
+                  enablePan={true}
+                  enableZoom={true}
+                  enableRotate={true}
+                  minDistance={3.4}
+                  maxDistance={20}
+                  rotateSpeed={0.5}
+                  zoomSpeed={1.0}
+                  panSpeed={0.5}
+                  onChange={handleGlobeZoom}
+                />
+              </>
+            )}
+          </Canvas>
 
-            <MapOverlay 
-              $isVisible={showMap}
-              onClick={() => {
-                if (controlsRef.current) {
-                  const distance = controlsRef.current.getDistance()
-                  if (distance > 7.5) {
+          <MapOverlay 
+            $isVisible={showMap}
+            onClick={() => {
+              if (controlsRef.current) {
+                const distance = controlsRef.current.getDistance()
+                if (distance > 7.5) {
+                  setShowMap(false)
+                }
+              }
+            }}
+          >
+            <MapContainer
+              center={mapCenter}
+              zoom={4}
+              minZoom={3}
+              maxZoom={18}
+              style={{ height: '100%', width: '100%' }}
+              zoomControl={true}
+              key={`${mapCenter[0]}-${mapCenter[1]}`}
+              whenReady={(map) => {
+                fetchLocalProjects(map.target)
+                map.target.on('moveend', () => fetchLocalProjects(map.target))
+                map.target.on('zoomend', () => {
+                  if (map.target.getZoom() <= 3) {
                     setShowMap(false)
                   }
-                }
+                })
               }}
             >
-              <MapContainer
-                center={mapCenter}
-                zoom={4}
-                minZoom={3}
-                maxZoom={18}
-                style={{ height: '100%', width: '100%' }}
-                zoomControl={true}
-                key={`${mapCenter[0]}-${mapCenter[1]}`}
-                whenReady={(map) => {
-                  fetchLocalProjects(map.target)
-                  map.target.on('moveend', () => fetchLocalProjects(map.target))
-                  map.target.on('zoomend', () => {
-                    if (map.target.getZoom() <= 3) {
-                      setShowMap(false)
-                    }
-                  })
-                }}
-              >
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                />
-                
-                <FilterContainer>
-                  <FilterLabel>Filter Locations</FilterLabel>
-                  <FilterButton 
-                    $active={selectedFilter === 'all'}
-                    onClick={() => setSelectedFilter('all')}
-                  >
-                    All
-                  </FilterButton>
-                  <FilterButton 
-                    $active={selectedFilter === 'humanitarian'}
-                    onClick={() => setSelectedFilter('humanitarian')}
-                  >
-                    Humanitarian
-                  </FilterButton>
-                  <FilterButton 
-                    $active={selectedFilter === 'community'}
-                    onClick={() => setSelectedFilter('community')}
-                  >
-                    Community
-                  </FilterButton>
-                  <FilterButton 
-                    $active={selectedFilter === 'education'}
-                    onClick={() => setSelectedFilter('education')}
-                  >
-                    Education
-                  </FilterButton>
-                  <FilterButton 
-                    $active={selectedFilter === 'religious'}
-                    onClick={() => setSelectedFilter('religious')}
-                  >
-                    Religious
-                  </FilterButton>
-                </FilterContainer>
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
+              
+              <FilterContainer>
+                <FilterLabel>Filter Locations</FilterLabel>
+                <FilterButton 
+                  $active={selectedFilter === 'all'}
+                  onClick={() => setSelectedFilter('all')}
+                >
+                  All
+                </FilterButton>
+                <FilterButton 
+                  $active={selectedFilter === 'humanitarian'}
+                  onClick={() => setSelectedFilter('humanitarian')}
+                >
+                  Humanitarian
+                </FilterButton>
+                <FilterButton 
+                  $active={selectedFilter === 'community'}
+                  onClick={() => setSelectedFilter('community')}
+                >
+                  Community
+                </FilterButton>
+                <FilterButton 
+                  $active={selectedFilter === 'education'}
+                  onClick={() => setSelectedFilter('education')}
+                >
+                  Education
+                </FilterButton>
+                <FilterButton 
+                  $active={selectedFilter === 'religious'}
+                  onClick={() => setSelectedFilter('religious')}
+                >
+                  Religious
+                </FilterButton>
+              </FilterContainer>
 
-                {localProjects
-                  .filter(project => {
-                    if (selectedFilter === 'all') return true;
-                    
-                    switch (selectedFilter) {
-                      case 'humanitarian':
-                        return ['ngo', 'charity', 'humanitarian', 'food_bank', 'soup_kitchen', 'shelter', 'volunteer_centre'].includes(project.type);
-                      case 'community':
-                        return ['community_centre', 'social_centre', 'social_facility'].includes(project.type);
-                      case 'education':
-                        return ['school', 'library', 'university', 'college'].includes(project.type);
-                      case 'religious':
-                        return ['place_of_worship'].includes(project.type);
-                      default:
-                        return true;
-                    }
-                  })
-                  .map(project => (
-                    <Marker 
-                      key={project.id}
-                      position={project.position}
-                      icon={customIcon}
-                    >
-                      <Popup>
-                        <div style={{ 
-                          padding: '5px',
-                          maxWidth: '300px'
+              {localProjects
+                .filter(project => {
+                  if (selectedFilter === 'all') return true;
+                  
+                  switch (selectedFilter) {
+                    case 'humanitarian':
+                      return ['ngo', 'charity', 'humanitarian', 'food_bank', 'soup_kitchen', 'shelter', 'volunteer_centre'].includes(project.type);
+                    case 'community':
+                      return ['community_centre', 'social_centre', 'social_facility'].includes(project.type);
+                    case 'education':
+                      return ['school', 'library', 'university', 'college'].includes(project.type);
+                    case 'religious':
+                      return ['place_of_worship'].includes(project.type);
+                    default:
+                      return true;
+                  }
+                })
+                .map(project => (
+                  <Marker 
+                    key={project.id}
+                    position={project.position}
+                    icon={customIcon}
+                  >
+                    <Popup>
+                      <div style={{ 
+                        padding: '5px',
+                        maxWidth: '300px'
+                      }}>
+                        <h3 style={{ 
+                          color: '#333', 
+                          marginBottom: '8px',
+                          fontSize: '16px',
+                          borderBottom: '2px solid #4ecdc4'
                         }}>
-                          <h3 style={{ 
-                            color: '#333', 
-                            marginBottom: '8px',
-                            fontSize: '16px',
-                            borderBottom: '2px solid #4ecdc4'
-                          }}>
-                            {project.title}
-                          </h3>
-                          <p style={{ 
-                            color: '#666',
-                            fontSize: '14px',
-                            marginBottom: '10px'
-                          }}>
-                            {project.description}
-                          </p>
-                          <div style={{ 
-                            fontSize: '13px',
-                            color: '#888',
-                            marginTop: '10px'
-                          }}>
-                            <p style={{ marginBottom: '5px' }}>Type: {project.type}</p>
-                            {project.website && (
-                              <p style={{ marginBottom: '5px' }}>
-                                <a 
-                                  href={project.website.startsWith('http') ? project.website : `https://${project.website}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{
-                                    color: '#4ecdc4',
-                                    textDecoration: 'none'
-                                  }}
-                                >
-                                  Visit Website
-                                </a>
-                              </p>
-                            )}
-                            {project.email && (
-                              <p style={{ marginBottom: '5px' }}>
-                                <a 
-                                  href={`mailto:${project.email}`}
-                                  style={{
-                                    color: '#4ecdc4',
-                                    textDecoration: 'none'
-                                  }}
-                                >
-                                  Contact via Email
-                                </a>
-                              </p>
-                            )}
-                            {project.phone && (
-                              <p style={{ marginBottom: '5px' }}>
-                                <a 
-                                  href={`tel:${project.phone}`}
-                                  style={{
-                                    color: '#4ecdc4',
-                                    textDecoration: 'none'
-                                  }}
-                                >
-                                  Call {project.phone}
-                                </a>
-                              </p>
-                            )}
-                            {!project.website && !project.email && !project.phone && (
-                              <p style={{ 
-                                color: '#999',
-                                fontStyle: 'italic'
-                              }}>
-                                Search for "{project.title}" to find contact information
-                              </p>
-                            )}
-                          </div>
+                          {project.title}
+                        </h3>
+                        <p style={{ 
+                          color: '#666',
+                          fontSize: '14px',
+                          marginBottom: '10px'
+                        }}>
+                          {project.description}
+                        </p>
+                        <div style={{ 
+                          fontSize: '13px',
+                          color: '#888',
+                          marginTop: '10px'
+                        }}>
+                          <p style={{ marginBottom: '5px' }}>Type: {project.type}</p>
+                          {project.website && (
+                            <p style={{ marginBottom: '5px' }}>
+                              <a 
+                                href={project.website.startsWith('http') ? project.website : `https://${project.website}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  color: '#4ecdc4',
+                                  textDecoration: 'none'
+                                }}
+                              >
+                                Visit Website
+                              </a>
+                            </p>
+                          )}
+                          {project.email && (
+                            <p style={{ marginBottom: '5px' }}>
+                              <a 
+                                href={`mailto:${project.email}`}
+                                style={{
+                                  color: '#4ecdc4',
+                                  textDecoration: 'none'
+                                }}
+                              >
+                                Contact via Email
+                              </a>
+                            </p>
+                          )}
+                          {project.phone && (
+                            <p style={{ marginBottom: '5px' }}>
+                              <a 
+                                href={`tel:${project.phone}`}
+                                style={{
+                                  color: '#4ecdc4',
+                                  textDecoration: 'none'
+                                }}
+                              >
+                                Call {project.phone}
+                              </a>
+                            </p>
+                          )}
+                          {!project.website && !project.email && !project.phone && (
+                            <p style={{ 
+                              color: '#999',
+                              fontStyle: 'italic'
+                            }}>
+                              Search for "{project.title}" to find contact information
+                            </p>
+                          )}
                         </div>
-                      </Popup>
-                    </Marker>
-                  ))}
-              </MapContainer>
-            </MapOverlay>
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
+            </MapContainer>
+          </MapOverlay>
 
-            <InfoMessage>
-              🚧 We're new here! We're aware of some bugs and are actively working to fix them. 
-              Thanks for your patience! 🛠️
-            </InfoMessage>
-          </CanvasContainer>
+          <InfoMessage>
+            🚧 We're new here! We're aware of some bugs and are actively working to fix them. 
+            Thanks for your patience! 🛠️
+          </InfoMessage>
+        </CanvasContainer>
 
-          <HelpPanel>
-            <HelpTitle>How to Use the Globe</HelpTitle>
-            <HelpList>
-              <li>🌍 Click and drag to rotate the globe</li>
-              <li>🔍 Scroll to zoom in/out</li>
-              <li>🎯 Zoom in on any area to see local projects</li>
-              <li>📍 Click markers to see project details</li>
-              <li>🏷️ Use filters to find specific opportunities</li>
-            </HelpList>
-          </HelpPanel>
-        </HeroSection>
-        <InfoSection />
-        <ImpactSection />
-        <ContactSection />
-        <ProjectModal />
-      </AppContainer>
-    </ProjectProvider>
+        <HelpPanel>
+          <HelpTitle>{t('hero.helpTitle')}</HelpTitle>
+          <HelpList>
+            {t('hero.helpItems').map((item, index) => (
+              <li key={index}>{item}</li>
+            ))}
+          </HelpList>
+        </HelpPanel>
+      </HeroSection>
+      <InfoSection />
+      <ImpactSection />
+      <ContactSection />
+      <ProjectModal />
+    </AppContainer>
+  )
+}
+
+// Main App component now just provides context
+function App() {
+  return (
+    <LanguageProvider>
+      <ProjectProvider>
+        <AppContent />
+      </ProjectProvider>
+    </LanguageProvider>
   )
 }
 
