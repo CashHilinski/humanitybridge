@@ -1,12 +1,13 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import { useLanguage } from '../contexts/LanguageContext'
 
 const Section = styled.section`
   min-height: 100vh;
-  padding: 8rem 2rem;
-  color: white;
+  padding: 8rem 2rem 6rem;
+  color: var(--text-primary);
   position: relative;
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-light) 100%);
   
   &::before {
     content: '';
@@ -19,80 +20,87 @@ const Section = styled.section`
     background: linear-gradient(to bottom, rgba(255,255,255,0.1), transparent);
   }
 
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: 
-      radial-gradient(circle at 20px 20px, rgba(78, 205, 196, 0.03) 2px, transparent 0),
-      radial-gradient(circle at 40px 40px, rgba(255, 107, 107, 0.03) 2px, transparent 0);
-    background-size: 60px 60px;
-    background-position: 0 0, 30px 30px;
-    pointer-events: none;
-    opacity: 0.5;
+  @media (max-width: 768px) {
+    padding: 7rem 1.5rem 4rem;
   }
+`
+
+const BackgroundGradient = styled.div`
+  position: absolute;
+  top: 20%;
+  left: 10%;
+  width: 40vw;
+  height: 40vw;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(0, 113, 227, 0.08) 0%, transparent 70%);
+  filter: blur(50px);
+  pointer-events: none;
+  z-index: 0;
 `
 
 const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  gap: 4rem;
+  gap: 3rem;
+  position: relative;
+  z-index: 1;
 `
 
 const Card = styled.div`
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
+  background: var(--card-background);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
   border-radius: 24px;
-  padding: 3rem;
-  margin: 2rem 0;
-  transform: translateY(50px);
+  padding: 2.5rem;
+  margin: 1rem 0;
+  transform: translateY(30px);
   opacity: 0;
   animation: fadeIn 0.8s forwards;
   animation-play-state: paused;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--card-border);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
   
   &:hover {
-    transform: translateY(-5px) scale(1.02);
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(78, 205, 196, 0.2);
-    box-shadow: 
-      0 20px 40px rgba(0, 0, 0, 0.2),
-      inset 0 0 80px rgba(78, 205, 196, 0.05);
+    transform: translateY(-5px);
+    background: var(--card-hover);
+    border-color: rgba(0, 113, 227, 0.2);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   }
   
   &.visible {
     animation-play-state: running;
   }
 
-  &::before {
+  &::after {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
-    width: 50px;
-    height: 50px;
-    border-top: 2px solid rgba(78, 205, 196, 0.3);
-    border-left: 2px solid rgba(78, 205, 196, 0.3);
-    border-radius: 8px 0 0 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 113, 227, 0.3), transparent);
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.4s ease;
   }
 
-  &:hover::before {
+  &:hover::after {
     opacity: 1;
   }
 
   h3 {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     margin-bottom: 20px;
-    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-primary);
     display: inline-block;
     position: relative;
     padding-bottom: 15px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
     &::after {
       content: '';
@@ -101,8 +109,8 @@ const Card = styled.div`
       left: 0;
       width: 40px;
       height: 3px;
-      background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
-      border-radius: 2px;
+      background: var(--accent-blue);
+      border-radius: 1.5px;
       transition: width 0.3s ease;
     }
   }
@@ -112,45 +120,26 @@ const Card = styled.div`
   }
 
   p {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
     position: relative;
-    padding-left: 16px;
+    letter-spacing: -0.2px;
     
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 12px;
-      width: 4px;
-      height: 4px;
-      background: #4ecdc4;
-      border-radius: 50%;
-      opacity: 0.7;
+    & + p {
+      margin-top: 1rem;
     }
   }
 
   a {
-    color: #4ecdc4;
+    color: var(--accent-blue);
     text-decoration: none;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
     position: relative;
-    padding-bottom: 2px;
+    font-weight: 500;
     
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 0;
-      height: 1px;
-      background: currentColor;
-      transition: width 0.3s ease;
-    }
-    
-    &:hover::after {
-      width: 100%;
+    &:hover {
+      color: var(--accent-teal);
     }
   }
 
@@ -163,33 +152,40 @@ const Card = styled.div`
 `
 
 const Title = styled.h2`
-  font-size: 3.5rem;
-  margin-bottom: 3rem;
+  font-size: 3rem;
+  margin-bottom: 2rem;
   text-align: center;
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-primary);
   position: relative;
+  letter-spacing: -0.5px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   
-  &::before {
-    content: '';
-    position: absolute;
-    top: -20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(45deg, #ff6b6b20, #4ecdc420);
-    border-radius: 50%;
-    filter: blur(15px);
+  span {
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  &::after {
-    width: 120px;
-    height: 6px;
-    background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
-    border-radius: 3px;
-    box-shadow: 0 2px 10px rgba(78, 205, 196, 0.3);
+  @media (max-width: 768px) {
+    font-size: 2.4rem;
+  }
+`
+
+const RecentUpdate = styled.div`
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  font-weight: 500;
+  letter-spacing: -0.3px;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+
+  ${Card}:hover & {
+    opacity: 1;
   }
 `
 
@@ -197,9 +193,9 @@ const InfoSection = () => {
   const { t } = useLanguage()
   
   // Add intersection observer to animate cards when they come into view
-  const observerRef = React.useRef(null)
+  const observerRef = useRef(null)
   
-  React.useEffect(() => {
+  useEffect(() => {
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach(entry => {
@@ -218,34 +214,49 @@ const InfoSection = () => {
     return () => observerRef.current.disconnect()
   }, [])
 
+  // Use fixed recent update dates
+  const updateDates = [
+    '3 days ago',
+    '1 week ago',
+    '2 weeks ago',
+    'Last month',
+    'Recently'
+  ]
+
   return (
     <Section id="about">
+      <BackgroundGradient />
       <Container>
-        <Title>{t('about.title')}</Title>
+        <Title><span>{t('about.title')}</span></Title>
         
         <Card className="info-card">
           <h3>{t('about.whoWeAre.title')}</h3>
           <p>{t('about.whoWeAre.content')}</p>
+          <RecentUpdate>Updated {updateDates[0]}</RecentUpdate>
         </Card>
 
         <Card className="info-card">
           <h3>{t('about.mission.title')}</h3>
           <p>{t('about.mission.content')}</p>
+          <RecentUpdate>Updated {updateDates[1]}</RecentUpdate>
         </Card>
 
         <Card className="info-card">
           <h3>{t('about.howItWorks.title')}</h3>
           <p>{t('about.howItWorks.content')}</p>
+          <RecentUpdate>Updated {updateDates[2]}</RecentUpdate>
         </Card>
 
         <Card className="info-card">
           <h3>{t('about.impact.title')}</h3>
           <p>{t('about.impact.content')}</p>
+          <RecentUpdate>Updated {updateDates[3]}</RecentUpdate>
         </Card>
 
         <Card className="info-card">
           <h3>{t('about.getInvolved.title')}</h3>
           <p>{t('about.getInvolved.content')}</p>
+          <RecentUpdate>Updated {updateDates[4]}</RecentUpdate>
         </Card>
       </Container>
     </Section>

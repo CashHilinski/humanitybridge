@@ -10,19 +10,39 @@ import ProjectModal from './components/ProjectModal'
 import InfoSection from './components/InfoSection'
 import ImpactSection from './components/ImpactSection'
 import ContactSection from './components/ContactSection'
+import LoadingScreen from './components/LoadingScreen'
 import { ProjectProvider } from './contexts/ProjectContext'
 import L from 'leaflet'
 import { LanguageProvider, useLanguage, translations } from './contexts/LanguageContext'
+import { ThemeProvider } from './contexts/ThemeContext'
+import { UIProvider, useUI } from './contexts/UIContext'
 
 const AppContainer = styled.div`
   width: 100vw;
   min-height: 100vh;
   min-height: -webkit-fill-available;
-  background: #1E1E2E;
+  background: var(--primary);
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
   direction: ${props => props.$direction};
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    background: radial-gradient(circle at 10% 30%, rgba(0, 113, 227, 0.03) 0%, transparent 40%),
+                radial-gradient(circle at 90% 70%, rgba(45, 193, 180, 0.03) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(255, 55, 95, 0.03) 0%, transparent 50%);
+  }
 
   @supports (-webkit-touch-callout: none) {
     /* iOS specific fix */
@@ -52,10 +72,11 @@ const CanvasContainer = styled.div`
   width: 80%;
   height: calc(100% - 80px);
   background: #000000;
-  border-radius: 20px;
+  border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 113, 227, 0.2);
+  border: 1px solid var(--glass-border);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   @media (max-width: 768px) {
     width: 100%;
@@ -105,25 +126,30 @@ const MessagePanel = styled.div`
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 0.8rem 1.2rem;
-  color: white;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 10px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  font-size: 0.9rem;
+  padding: 0.8rem 1.5rem;
+  color: var(--text-primary);
+  background: var(--glass-background);
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  font-size: 0.95rem;
   text-align: center;
   max-width: 400px;
   z-index: 5;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  letter-spacing: -0.3px;
+  line-height: 1.5;
 `
 
 const EmailLink = styled.a`
-  color: #ff6b6b;
+  color: var(--accent-blue);
   text-decoration: none;
   transition: color 0.3s ease;
+  font-weight: 500;
 
   &:hover {
-    color: #4ecdc4;
+    color: var(--accent-teal);
   }
 `
 
@@ -132,69 +158,102 @@ const FilterContainer = styled.div`
   top: 20px;
   right: 20px;
   z-index: 1000;
-  background: rgba(30, 30, 46, 0.95);
-  padding: 12px;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  background: var(--glass-background);
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   max-width: 400px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    border-color: rgba(0, 113, 227, 0.15);
+  }
 
   @media (max-width: 768px) {
     top: 5px;
     right: 5px;
-    padding: 4px;
-    gap: 2px;
+    padding: 10px;
+    gap: 6px;
     max-width: 200px;
-    background: rgba(20, 20, 30, 0.98);
   }
 `
 
 const FilterButton = styled.button`
   padding: 8px 16px;
-  border: 1px solid ${props => props.$active ? '#4ecdc4' : 'rgba(255, 255, 255, 0.1)'};
-  border-radius: 8px;
-  background: ${props => props.$active ? '#4ecdc4' : 'transparent'};
-  color: ${props => props.$active ? '#1E1E2E' : '#fff'};
+  border: 1px solid ${props => props.$active ? 'var(--accent-blue)' : 'rgba(255, 255, 255, 0.1)'};
+  border-radius: 12px;
+  background: ${props => props.$active ? 'var(--accent-blue)' : 'rgba(255, 255, 255, 0.05)'};
+  color: ${props => props.$active ? '#fff' : 'var(--text-secondary)'};
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  box-shadow: ${props => props.$active 
+    ? '0 4px 12px rgba(0, 113, 227, 0.3)' 
+    : '0 2px 6px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)'};
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+    opacity: ${props => props.$active ? 0 : 1};
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
 
   @media (max-width: 768px) {
-    padding: 4px 6px;
-    font-size: 9px;
-    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 10px;
+    border-radius: 8px;
     min-width: auto;
     flex: 0 1 auto;
     letter-spacing: 0;
-    border-width: 1px;
   }
 
   &:hover {
-    background: ${props => props.$active ? '#4ecdc4' : 'rgba(78, 205, 196, 0.1)'};
-    border-color: #4ecdc4;
-    transform: translateY(-1px);
+    background: ${props => props.$active ? 'var(--accent-blue)' : 'rgba(0, 113, 227, 0.1)'};
+    border-color: var(--accent-blue);
+    transform: translateY(-2px);
+    box-shadow: ${props => props.$active 
+      ? '0 6px 14px rgba(0, 113, 227, 0.4)' 
+      : '0 4px 10px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)'};
+    
+    &::after {
+      opacity: 0;
+    }
   }
 
   &:active {
-    transform: translateY(0px);
+    transform: translateY(0);
+    box-shadow: ${props => props.$active 
+      ? '0 2px 8px rgba(0, 113, 227, 0.3)' 
+      : '0 1px 3px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.03)'};
   }
 `
 
 const FilterLabel = styled.div`
-  color: #fff;
+  color: var(--text-secondary);
   font-size: 12px;
-  opacity: 0.7;
   margin-bottom: 4px;
   width: 100%;
   text-transform: uppercase;
   letter-spacing: 1px;
+  font-weight: 500;
 
   @media (max-width: 768px) {
     display: none;  // Hide the label on mobile
@@ -250,58 +309,93 @@ const InfoMessage = styled.div`
 `
 
 const HelpPanel = styled.div`
-  width: 280px;
-  background: #1E1E2E;
-  padding: 24px;
-  border-radius: 15px;
-  color: white;
-  font-size: 0.9rem;
-  border: 1px solid rgba(78, 205, 196, 0.1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  height: fit-content;
-  margin-top: 80px;
+  position: absolute;
+  right: 20px;
+  top: 100px;
+  background: var(--glass-background);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 1.5rem;
+  max-width: 280px;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  color: var(--text-primary);
+  z-index: 5;
+  transition: all 0.3s ease;
+  transform: translateX(0);
+
+  &:hover {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    border-color: rgba(0, 113, 227, 0.15);
+    transform: translateX(-5px);
+  }
 
   @media (max-width: 768px) {
-    width: 100%;
-    margin-top: 20px;
-    padding: 16px;
+    right: 10px;
+    top: 70px;
+    padding: 1rem;
+    max-width: 220px;
+  }
+
+  h4 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    svg {
+      width: 16px;
+      height: 16px;
+      color: var(--accent-blue);
+    }
+  }
+
+  ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    margin-bottom: 0.8rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    letter-spacing: -0.2px;
+    line-height: 1.5;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    
+    @media (max-width: 768px) {
+      font-size: 0.8rem;
+      margin-bottom: 0.6rem;
+    }
   }
 `
 
-const HelpTitle = styled.h3`
-  color: #4ecdc4;
-  font-size: 1.2rem;
-  margin-bottom: 16px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-`
+const MinimizeButton = styled.button`
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 
-const HelpList = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 0;
-
-  li {
-    margin-bottom: 16px;
-    color: rgba(255, 255, 255, 0.9);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 0.95rem;
-    line-height: 1.4;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 8px;
-    transition: all 0.3s ease;
-
-    &:hover {
-      background: rgba(78, 205, 196, 0.1);
-      transform: translateX(5px);
-    }
-
-    &:last-child {
-      margin-bottom: 0;
-    }
+  &:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.1);
   }
 `
 
@@ -320,6 +414,7 @@ const AppContent = () => {
   const [isMobile, setIsMobile] = useState(false)
   const { language, t } = useLanguage()
   const direction = translations[language]?.direction || 'ltr'
+  const { uiState, toggleUI } = useUI()
 
   // Add this effect to detect mobile
   useEffect(() => {
@@ -723,14 +818,48 @@ const AppContent = () => {
           </InfoMessage>
         </CanvasContainer>
 
-        <HelpPanel>
-          <HelpTitle>{t('hero.helpTitle')}</HelpTitle>
-          <HelpList>
-            {t('hero.helpItems').map((item, index) => (
-              <li key={index}>{item}</li>
-            ))}
-          </HelpList>
-        </HelpPanel>
+        {uiState.isHelpPanelOpen && (
+          <HelpPanel>
+            <h4>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 1a6 6 0 0 0-6 6v1h12V7a6 6 0 0 0-6-6zM4 10v2a6 6 0 1 0 12 0v-2H4z" />
+              </svg>
+              {t('hero.helpTitle')}
+            </h4>
+            <MinimizeButton onClick={() => toggleUI('isHelpPanelOpen')}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </MinimizeButton>
+            <ul>
+              {t('hero.helpItems').map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+          </HelpPanel>
+        )}
+        
+        {!uiState.isHelpPanelOpen && (
+          <MinimizeButton 
+            style={{ 
+              position: 'fixed', 
+              right: '20px', 
+              top: '100px',
+              background: 'var(--glass-background)',
+              border: '1px solid var(--glass-border)',
+              borderRadius: '50%',
+              width: '32px',
+              height: '32px',
+              boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)'
+            }} 
+            onClick={() => toggleUI('isHelpPanelOpen')}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </MinimizeButton>
+        )}
       </HeroSection>
       <InfoSection />
       <ImpactSection />
@@ -744,9 +873,14 @@ const AppContent = () => {
 function App() {
   return (
     <LanguageProvider>
-      <ProjectProvider>
-        <AppContent />
-      </ProjectProvider>
+      <ThemeProvider>
+        <UIProvider>
+          <ProjectProvider>
+            <LoadingScreen />
+            <AppContent />
+          </ProjectProvider>
+        </UIProvider>
+      </ThemeProvider>
     </LanguageProvider>
   )
 }

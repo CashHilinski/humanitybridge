@@ -12,6 +12,7 @@
   "dependencies": {
     "@react-three/drei": "^9.88.17",
     "@react-three/fiber": "^8.15.11",
+    "@splinetool/react-spline": "^4.0.0",
     "@turf/turf": "^7.1.0",
     "axios": "^1.6.2",
     "cesium": "^1.123.0",
